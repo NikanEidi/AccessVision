@@ -39,22 +39,27 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    const handlePageShow = (event) => {
-      if (event.persisted) {
-        timeoutsRef.current.forEach(timeout => clearTimeout(timeout));
-        timeoutsRef.current = [];
-        setIsGlitching(false);
-        setCardsVisible([false, false, false]);
-        setHasAnimated(false);
-        setTypedText('');
+const handlePageShow = (event) => {
+    if (event.persisted) {
+      timeoutsRef.current.forEach(timeout => clearTimeout(timeout));
+      timeoutsRef.current = [];
+      setIsGlitching(false);
+      setCardsVisible([false, false, false]);
+      setHasAnimated(false);
+      setTypedText('');
+      setIsTyping(true);
+      setNameGlitch(false);
+      
+      setTimeout(() => {
         setIsTyping(true);
-        setNameGlitch(false);
-      }
-    };
-    
-    window.addEventListener('pageshow', handlePageShow);
-    return () => window.removeEventListener('pageshow', handlePageShow);
-  }, []);
+        setTypedText('');
+      }, 50);
+    }
+  };
+  
+  window.addEventListener('pageshow', handlePageShow);
+  return () => window.removeEventListener('pageshow', handlePageShow);
+}, []);
 
   useEffect(() => {
     const checkDevice = () => {
@@ -68,13 +73,14 @@ export default function App() {
   useEffect(() => {
     let currentIndex = 0;
     const typingInterval = setInterval(() => {
-      if (currentIndex <= fullName.length) {
-        setTypedText(fullName.slice(0, currentIndex));
-        currentIndex++;
-      } else {
-        clearInterval(typingInterval);
-        setIsTyping(false);
-      }
+     if (currentIndex <= fullName.length) {
+      setTypedText(fullName.slice(0, currentIndex));
+      currentIndex++;
+     } 
+     else {
+      clearInterval(typingInterval);
+      setIsTyping(false);
+     }
     }, 200);
 
     return () => clearInterval(typingInterval);
