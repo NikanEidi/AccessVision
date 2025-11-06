@@ -76,14 +76,7 @@ export default function App() {
     setTimeout(() => setTypedText('NIKAN EIDI'), 700);
     
     setTimeout(() => {
-      window.open(url, '_blank', 'noopener,noreferrer');
-      
-      setTimeout(() => {
-        setCardsVisible([true, false, false]);
-        setTimeout(() => setCardsVisible([true, true, false]), 100);
-        setTimeout(() => setCardsVisible([true, true, true]), 200);
-        setIsGlitching(false);
-      }, 300);
+      window.location.href = url;
     }, 1000);
   };
 
@@ -404,40 +397,52 @@ export default function App() {
   const cursorColorRgb = mousePosition.x < window.innerWidth / 2 ? '111, 41, 255' : '40, 255, 133';
 
   return (
-    <div className="min-h-screen overflow-hidden relative flex items-center justify-center p-2 sm:p-4" style={{
+    <div className="min-h-screen relative flex items-center justify-center p-2 sm:p-4" style={{
       background: 'black',
       position: 'relative',
-      perspective: '1500px'
+      perspective: '1500px',
+      minHeight: '100vh',
+      height: '100%'
     }}>
-      <div style={{
+      
+      <canvas ref={matrixCanvasRef} style={{ 
         position: 'fixed',
+        top: 0,
         left: 0,
-        top: 0,
-        width: '50vw',
+        width: '100vw',
         height: '100vh',
-        maxHeight: '100vh',
-        background: 'linear-gradient(135deg, #6F29FF 0%, #5a1fd9 100%)',
-        zIndex: 0,
-        overflow: 'hidden'
+        zIndex: 1,
+        opacity: 0.95,
+        pointerEvents: 'none'
       }} />
-      <div style={{
+      <canvas ref={particleCanvasRef} style={{ 
         position: 'fixed',
-        left: '50vw',
         top: 0,
-        width: '50vw',
+        left: 0,
+        width: '100vw',
         height: '100vh',
-        maxHeight: '100vh',
-        background: 'linear-gradient(135deg, #28FF85 0%, #1fd96b 100%)',
-        zIndex: 0,
-        overflow: 'hidden'
+        zIndex: 2,
+        opacity: 0.8,
+        pointerEvents: 'none'
       }} />
+      {isDesktop && <canvas ref={cursorCanvasRef} style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
+        zIndex: 9999,
+        pointerEvents: 'none'
+      }} />}
       
-      <canvas ref={matrixCanvasRef} className="absolute inset-0 pointer-events-none" style={{ zIndex: 1, opacity: 0.95 }} />
-      <canvas ref={particleCanvasRef} className="absolute inset-0 pointer-events-none" style={{ zIndex: 2, opacity: 0.8 }} />
-      {isDesktop && <canvas ref={cursorCanvasRef} className="absolute inset-0 pointer-events-none" style={{zIndex: 9999}} />}
-      
-      <div className="absolute inset-0 pointer-events-none" style={{ 
+      <div style={{ 
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100vw',
+        height: '100vh',
         zIndex: 3,
+        pointerEvents: 'none',
         background: 'radial-gradient(ellipse at center, transparent 30%, rgba(0,0,0,0.4) 100%)',
         backgroundImage: 'repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0px, transparent 1px, transparent 2px, rgba(0,0,0,0.15) 3px)',
       }}></div>
@@ -447,13 +452,24 @@ export default function App() {
         
         ${isDesktop ? '* { cursor: none; }' : ''}
         
-        html, body {
-          margin: 0;
-          padding: 0;
-          overflow-x: hidden;
+        html {
           width: 100%;
           height: 100%;
-          position: fixed;
+          overflow-x: hidden;
+          overflow-y: auto;
+        }
+        
+        body {
+          margin: 0;
+          padding: 0;
+          width: 100%;
+          min-height: 100vh;
+          overflow-x: hidden;
+        }
+        
+        #root {
+          width: 100%;
+          min-height: 100vh;
         }
         
         @keyframes glitch-skew {
