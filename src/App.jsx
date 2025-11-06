@@ -11,6 +11,7 @@ export default function App() {
   const [isGlitching, setIsGlitching] = useState(false);
   const [card3DRotation, setCard3DRotation] = useState([{ x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 }]);
   const [glitchEffect, setGlitchEffect] = useState(false);
+  const [nameGlitch, setNameGlitch] = useState(false);
   const [isDesktop, setIsDesktop] = useState(false);
   const matrixCanvasRef = useRef(null);
   const particleCanvasRef = useRef(null);
@@ -18,6 +19,14 @@ export default function App() {
   const mouseRef = useRef({ x: 0, y: 0 });
 
   const fullName = "NIKAN EIDI";
+
+  useEffect(() => {
+    setIsGlitching(false);
+    setCardsVisible([false, false, false]);
+    setHasAnimated(false);
+    setTypedText('');
+    setIsTyping(true);
+  }, []);
 
   useEffect(() => {
     const checkDevice = () => {
@@ -59,6 +68,16 @@ export default function App() {
       setTimeout(triggerGlitch, Math.random() * 3000 + 5000);
     };
     const timeout = setTimeout(triggerGlitch, Math.random() * 3000 + 5000);
+    return () => clearTimeout(timeout);
+  }, []);
+
+  useEffect(() => {
+    const triggerNameGlitch = () => {
+      setNameGlitch(true);
+      setTimeout(() => setNameGlitch(false), 800);
+      setTimeout(triggerNameGlitch, 5000);
+    };
+    const timeout = setTimeout(triggerNameGlitch, 5000);
     return () => clearTimeout(timeout);
   }, []);
 
@@ -495,6 +514,33 @@ export default function App() {
           100% { transform: translate(0) skew(0deg); filter: hue-rotate(0deg) brightness(1); }
         }
         
+        @keyframes name-glitch {
+          0% { 
+            transform: translate(0);
+            text-shadow: -2px 0 0 #6F29FF, 2px 0 0 #28FF85;
+          }
+          20% { 
+            transform: translate(-2px, 2px);
+            text-shadow: -3px 0 0 #6F29FF, 3px 0 0 #28FF85;
+          }
+          40% { 
+            transform: translate(-2px, -2px);
+            text-shadow: -2px 0 0 #6F29FF, 2px 0 0 #28FF85;
+          }
+          60% { 
+            transform: translate(2px, 2px);
+            text-shadow: -3px 0 0 #6F29FF, 3px 0 0 #28FF85;
+          }
+          80% { 
+            transform: translate(2px, -2px);
+            text-shadow: -2px 0 0 #6F29FF, 2px 0 0 #28FF85;
+          }
+          100% { 
+            transform: translate(0);
+            text-shadow: -2px 0 0 #6F29FF, 2px 0 0 #28FF85;
+          }
+        }
+        
         @keyframes emerge-3d {
           0% {
             opacity: 0;
@@ -674,6 +720,11 @@ export default function App() {
           animation: rgb-split 0.3s ease-in-out;
         }
         
+        .name-glitch-triggered {
+          animation: name-glitch 0.8s ease-in-out;
+          display: inline-block;
+        }
+        
         .glow-effect {
           animation: glow-pulse 3.2s ease-in-out infinite;
         }
@@ -821,21 +872,24 @@ export default function App() {
           
           <div className="mb-2 sm:mb-3 md:mb-4 px-2">
             <span className="text-lg sm:text-xl md:text-2xl lg:text-3xl cyber-font font-black" style={{color: '#6F29FF', textShadow: '0 0 24px rgba(111, 41, 255, 1)'}}>{'< '}</span>
-            <h1 className="cyber-font text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black inline-block glitch-text">
+            <h1 className="cyber-font text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black inline-block">
               <span 
-                style={{
-                  background: 'linear-gradient(90deg, #6F29FF 0%, #6FD9AF 50%, #28FF85 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  backgroundClip: 'text',
-                  filter: 'drop-shadow(0 0 35px rgba(127, 177, 127, 1))',
-                  fontWeight: 900
-                }}
-              >
-                {typedText}
-                {isTyping && <span className="typing-cursor">|</span>}
-              </span>
-            </h1>
+              className={nameGlitch ? 'name-glitch-triggered' : ''}
+              style={{
+                background: 'linear-gradient(90deg, #28FF85 0%, #28FF85 50%, #6F29FF 50%, #6F29FF 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                filter: 'drop-shadow(0 0 35px rgba(127, 177, 127, 1))',
+                fontWeight: 900,
+                display: 'inline-block'
+              }}
+            >
+            {typedText}
+            {isTyping && <span className="typing-cursor">|</span>}
+            </span>
+          </h1>
+
             <span className="text-lg sm:text-xl md:text-2xl lg:text-3xl cyber-font font-black" style={{color: '#28FF85', textShadow: '0 0 24px rgba(40, 255, 133, 1)'}}>{' />'}</span>
           </div>
           
