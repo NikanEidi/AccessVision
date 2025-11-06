@@ -31,6 +31,29 @@ export default function App() {
     setTypedText('');
     setIsTyping(true);
     setNameGlitch(false);
+    
+    return () => {
+      timeoutsRef.current.forEach(timeout => clearTimeout(timeout));
+      timeoutsRef.current = [];
+    };
+  }, []);
+
+  useEffect(() => {
+    const handlePageShow = (event) => {
+      if (event.persisted) {
+        timeoutsRef.current.forEach(timeout => clearTimeout(timeout));
+        timeoutsRef.current = [];
+        setIsGlitching(false);
+        setCardsVisible([false, false, false]);
+        setHasAnimated(false);
+        setTypedText('');
+        setIsTyping(true);
+        setNameGlitch(false);
+      }
+    };
+    
+    window.addEventListener('pageshow', handlePageShow);
+    return () => window.removeEventListener('pageshow', handlePageShow);
   }, []);
 
   useEffect(() => {
@@ -115,7 +138,7 @@ export default function App() {
     
     timeoutsRef.current.push(t1, t2, t3, t4, t5, t6, t7, t8);
   };
-
+  
   const handleCardMouseMove = (e, index) => {
     if (!isDesktop) return;
     const card = e.currentTarget;
