@@ -17,10 +17,14 @@ export default function App() {
   const particleCanvasRef = useRef(null);
   const cursorCanvasRef = useRef(null);
   const mouseRef = useRef({ x: 0, y: 0 });
+  const timeoutsRef = useRef([]);
 
   const fullName = "NIKAN EIDI";
 
   useEffect(() => {
+    timeoutsRef.current.forEach(timeout => clearTimeout(timeout));
+    timeoutsRef.current = [];
+    
     setIsGlitching(false);
     setCardsVisible([false, false, false]);
     setHasAnimated(false);
@@ -65,39 +69,51 @@ export default function App() {
   useEffect(() => {
     const triggerGlitch = () => {
       setGlitchEffect(true);
-      setTimeout(() => setGlitchEffect(false), 300);
-      setTimeout(triggerGlitch, Math.random() * 3000 + 5000);
+      const t1 = setTimeout(() => setGlitchEffect(false), 300);
+      const t2 = setTimeout(triggerGlitch, Math.random() * 3000 + 5000);
+      timeoutsRef.current.push(t1, t2);
     };
     const timeout = setTimeout(triggerGlitch, Math.random() * 3000 + 5000);
-    return () => clearTimeout(timeout);
+    timeoutsRef.current.push(timeout);
+    return () => {
+      clearTimeout(timeout);
+    };
   }, []);
 
   useEffect(() => {
     const triggerNameGlitch = () => {
       setNameGlitch(true);
-      setTimeout(() => setNameGlitch(false), 800);
-      setTimeout(triggerNameGlitch, 5000);
+      const t1 = setTimeout(() => setNameGlitch(false), 800);
+      const t2 = setTimeout(triggerNameGlitch, 5000);
+      timeoutsRef.current.push(t1, t2);
     };
     const timeout = setTimeout(triggerNameGlitch, 5000);
-    return () => clearTimeout(timeout);
+    timeoutsRef.current.push(timeout);
+    return () => {
+      clearTimeout(timeout);
+    };
   }, []);
 
   const handleLinkClick = (e, url) => {
     e.preventDefault();
+    
+    timeoutsRef.current.forEach(timeout => clearTimeout(timeout));
+    timeoutsRef.current = [];
+    
     setIsGlitching(true);
     
-    setTimeout(() => setCardsVisible([true, true, false]), 100);
-    setTimeout(() => setCardsVisible([true, false, false]), 200);
-    setTimeout(() => setCardsVisible([false, false, false]), 300);
-    
-    setTimeout(() => setTypedText('N1K@N 31D1'), 400);
-    setTimeout(() => setTypedText('NIK4N E!DI'), 500);
-    setTimeout(() => setTypedText('N!KAN EID!'), 600);
-    setTimeout(() => setTypedText('NIKAN EIDI'), 700);
-    
-    setTimeout(() => {
+    const t1 = setTimeout(() => setCardsVisible([true, true, false]), 100);
+    const t2 = setTimeout(() => setCardsVisible([true, false, false]), 200);
+    const t3 = setTimeout(() => setCardsVisible([false, false, false]), 300);
+    const t4 = setTimeout(() => setTypedText('N1K@N 31D1'), 400);
+    const t5 = setTimeout(() => setTypedText('NIK4N E!DI'), 500);
+    const t6 = setTimeout(() => setTypedText('N!KAN EID!'), 600);
+    const t7 = setTimeout(() => setTypedText('NIKAN EIDI'), 700);
+    const t8 = setTimeout(() => {
       window.location.href = url;
     }, 1000);
+    
+    timeoutsRef.current.push(t1, t2, t3, t4, t5, t6, t7, t8);
   };
 
   const handleCardMouseMove = (e, index) => {
