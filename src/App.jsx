@@ -415,8 +415,10 @@ export default function App() {
         top: 0,
         width: '50vw',
         height: '100vh',
+        maxHeight: '100vh',
         background: 'linear-gradient(135deg, #6F29FF 0%, #5a1fd9 100%)',
-        zIndex: 0
+        zIndex: 0,
+        overflow: 'hidden'
       }} />
       <div style={{
         position: 'fixed',
@@ -424,8 +426,10 @@ export default function App() {
         top: 0,
         width: '50vw',
         height: '100vh',
+        maxHeight: '100vh',
         background: 'linear-gradient(135deg, #28FF85 0%, #1fd96b 100%)',
-        zIndex: 0
+        zIndex: 0,
+        overflow: 'hidden'
       }} />
       
       <canvas ref={matrixCanvasRef} className="absolute inset-0 pointer-events-none" style={{ zIndex: 1, opacity: 0.95 }} />
@@ -443,10 +447,13 @@ export default function App() {
         
         ${isDesktop ? '* { cursor: none; }' : ''}
         
-        body {
+        html, body {
           margin: 0;
           padding: 0;
           overflow-x: hidden;
+          width: 100%;
+          height: 100%;
+          position: fixed;
         }
         
         @keyframes glitch-skew {
