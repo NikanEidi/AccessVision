@@ -376,7 +376,7 @@ export default function App() {
     {
       title: 'LinkedIn',
       subtitle: 'Professional',
-      url: 'https://linkedin.com/in/nikaneidi',
+      url: 'https://linkedin.com/in/nikan-eidi-03476232b',
       icon: Linkedin,
       tag: 'NET'
     }
