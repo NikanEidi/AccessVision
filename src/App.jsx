@@ -26,6 +26,7 @@ export default function App() {
     setHasAnimated(false);
     setTypedText('');
     setIsTyping(true);
+    setNameGlitch(false);
   }, []);
 
   useEffect(() => {
@@ -874,22 +875,21 @@ export default function App() {
             <span className="text-lg sm:text-xl md:text-2xl lg:text-3xl cyber-font font-black" style={{color: '#6F29FF', textShadow: '0 0 24px rgba(111, 41, 255, 1)'}}>{'< '}</span>
             <h1 className="cyber-font text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black inline-block">
               <span 
-              className={nameGlitch ? 'name-glitch-triggered' : ''}
-              style={{
-                background: 'linear-gradient(90deg, #28FF85 0%, #28FF85 50%, #6F29FF 50%, #6F29FF 100%)',
-                WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
-                backgroundClip: 'text',
-                filter: 'drop-shadow(0 0 35px rgba(127, 177, 127, 1))',
-                fontWeight: 900,
-                display: 'inline-block'
-              }}
-            >
-            {typedText}
-            {isTyping && <span className="typing-cursor">|</span>}
-            </span>
-          </h1>
-
+                className={nameGlitch ? 'name-glitch-triggered' : ''}
+                style={{
+                  background: 'linear-gradient(90deg, #28FF85 0%, #28FF85 50%, #6F29FF 50%, #6F29FF 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  backgroundClip: 'text',
+                  filter: 'drop-shadow(0 0 35px rgba(127, 177, 127, 1))',
+                  fontWeight: 900,
+                  display: 'inline-block'
+                }}
+              >
+                {typedText}
+                {isTyping && <span className="typing-cursor">|</span>}
+              </span>
+            </h1>
             <span className="text-lg sm:text-xl md:text-2xl lg:text-3xl cyber-font font-black" style={{color: '#28FF85', textShadow: '0 0 24px rgba(40, 255, 133, 1)'}}>{' />'}</span>
           </div>
           
