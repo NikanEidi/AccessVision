@@ -11,12 +11,22 @@ export default function App() {
   const [isGlitching, setIsGlitching] = useState(false);
   const [card3DRotation, setCard3DRotation] = useState([{ x: 0, y: 0 }, { x: 0, y: 0 }, { x: 0, y: 0 }]);
   const [glitchEffect, setGlitchEffect] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
   const matrixCanvasRef = useRef(null);
   const particleCanvasRef = useRef(null);
   const cursorCanvasRef = useRef(null);
   const mouseRef = useRef({ x: 0, y: 0 });
 
   const fullName = "NIKAN EIDI";
+
+  useEffect(() => {
+    const checkDevice = () => {
+      setIsDesktop(window.innerWidth >= 1024 && !('ontouchstart' in window));
+    };
+    checkDevice();
+    window.addEventListener('resize', checkDevice);
+    return () => window.removeEventListener('resize', checkDevice);
+  }, []);
 
   useEffect(() => {
     let currentIndex = 0;
@@ -78,6 +88,7 @@ export default function App() {
   };
 
   const handleCardMouseMove = (e, index) => {
+    if (!isDesktop) return;
     const card = e.currentTarget;
     const rect = card.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width - 0.5;
@@ -91,6 +102,7 @@ export default function App() {
   };
 
   const handleCardMouseLeave = (index) => {
+    if (!isDesktop) return;
     setCard3DRotation(prev => {
       const newRotation = [...prev];
       newRotation[index] = { x: 0, y: 0 };
@@ -99,6 +111,7 @@ export default function App() {
   };
 
   useEffect(() => {
+    if (!isDesktop) return;
     const handleMouseMove = (e) => {
       mouseRef.current = { x: e.clientX, y: e.clientY };
       setMousePosition({ x: e.clientX, y: e.clientY });
@@ -109,9 +122,10 @@ export default function App() {
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
     };
-  }, []);
+  }, [isDesktop]);
 
   useEffect(() => {
+    if (!isDesktop) return;
     const canvas = cursorCanvasRef.current;
     if (!canvas) return;
     
@@ -150,7 +164,6 @@ export default function App() {
       }
 
       draw() {
-        // REVERSED: left purple, right green
         const color = this.isLeft ? '111, 41, 255' : '40, 255, 133';
         ctx.save();
         ctx.translate(this.x, this.y);
@@ -199,7 +212,7 @@ export default function App() {
     window.addEventListener('resize', handleResize, { passive: true });
     
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [isDesktop]);
 
   useEffect(() => {
     const canvas = matrixCanvasRef.current;
@@ -210,7 +223,7 @@ export default function App() {
     canvas.height = window.innerHeight;
 
     const chars = '01ｱｲｳｴｵｶｷｸｹｺｻｼｽｾｿﾀﾁﾂﾃﾄﾅﾆﾇﾈﾉﾊﾋﾌﾍﾎﾏﾐﾑﾒﾓﾔﾕﾖﾗﾘﾙﾚﾛﾜﾝ<>[]{}()'.split('');
-    const fontSize = 16;
+    const fontSize = window.innerWidth < 768 ? 12 : 16;
     const columns = Math.floor(canvas.width / fontSize);
     const drops = new Array(columns).fill(0).map(() => ({
       y: Math.random() * -100,
@@ -229,7 +242,6 @@ export default function App() {
         const y = drops[i].y * fontSize;
         
         const isLeft = x < canvas.width / 2;
-        // REVERSED: left purple, right green
         const color = isLeft ? '111, 41, 255' : '40, 255, 133';
         
         ctx.fillStyle = `rgba(${color}, 0.85)`;
@@ -252,6 +264,13 @@ export default function App() {
     const handleResize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
+      const newColumns = Math.floor(canvas.width / fontSize);
+      drops.length = newColumns;
+      for (let i = 0; i < newColumns; i++) {
+        if (!drops[i]) {
+          drops[i] = { y: Math.random() * -100, speed: Math.random() * 0.7 + 0.4 };
+        }
+      }
     };
     window.addEventListener('resize', handleResize, { passive: true });
     
@@ -293,7 +312,6 @@ export default function App() {
 
       draw() {
         const isLeft = this.x < canvas.width / 2;
-        // REVERSED: left purple, right green
         const color = isLeft ? '111, 41, 255' : '40, 255, 133';
         
         ctx.beginPath();
@@ -305,7 +323,8 @@ export default function App() {
       }
     }
 
-    const particles = Array.from({ length: 120 }, () => new Particle());
+    const particleCount = window.innerWidth < 768 ? 60 : 120;
+    const particles = Array.from({ length: particleCount }, () => new Particle());
 
     let frameCount = 0;
     const animate = () => {
@@ -330,7 +349,6 @@ export default function App() {
                 if (dist < 130) {
                   const avgX = (p1.x + p2.x) / 2;
                   const isLeft = avgX < canvas.width / 2;
-                  // REVERSED: left purple, right green
                   const color = isLeft ? '111, 41, 255' : '40, 255, 133';
                   
                   ctx.beginPath();
@@ -382,17 +400,15 @@ export default function App() {
     }
   ];
 
-  // REVERSED: left purple, right green
   const cursorColor = mousePosition.x < window.innerWidth / 2 ? '#6F29FF' : '#28FF85';
   const cursorColorRgb = mousePosition.x < window.innerWidth / 2 ? '111, 41, 255' : '40, 255, 133';
 
   return (
-    <div className="min-h-screen overflow-hidden relative flex items-center justify-center p-4" style={{
+    <div className="min-h-screen overflow-hidden relative flex items-center justify-center p-2 sm:p-4" style={{
       background: 'black',
       position: 'relative',
       perspective: '1500px'
     }}>
-      {/* REVERSED BACKGROUNDS: left purple, right green */}
       <div style={{
         position: 'fixed',
         left: 0,
@@ -414,7 +430,7 @@ export default function App() {
       
       <canvas ref={matrixCanvasRef} className="absolute inset-0 pointer-events-none" style={{ zIndex: 1, opacity: 0.95 }} />
       <canvas ref={particleCanvasRef} className="absolute inset-0 pointer-events-none" style={{ zIndex: 2, opacity: 0.8 }} />
-      <canvas ref={cursorCanvasRef} className="absolute inset-0 pointer-events-none" style={{zIndex: 9999}} />
+      {isDesktop && <canvas ref={cursorCanvasRef} className="absolute inset-0 pointer-events-none" style={{zIndex: 9999}} />}
       
       <div className="absolute inset-0 pointer-events-none" style={{ 
         zIndex: 3,
@@ -425,9 +441,7 @@ export default function App() {
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800;900&family=Share+Tech+Mono&family=Rajdhani:wght@500;600;700&display=swap');
         
-        * {
-          cursor: none;
-        }
+        ${isDesktop ? '* { cursor: none; }' : ''}
         
         body {
           margin: 0;
@@ -547,7 +561,7 @@ export default function App() {
         }
         
         @keyframes border-pulse {
-          0%, 100% { 
+          0%, 100% {
             box-shadow: 0 0 20px rgba(111, 41, 255, 0.6), 0 0 20px rgba(40, 255, 133, 0.6);
           }
           50% { 
@@ -679,79 +693,84 @@ export default function App() {
         
         @media (max-width: 768px) {
           .cyber-font {
-            letter-spacing: 0.05em;
+            letter-spacing: 0.02em;
           }
           .hack-font {
-            letter-spacing: 0.0em;
+            letter-spacing: 0.05em;
+          }
+        }
+        
+        @media (max-width: 640px) {
+          .cyber-font {
+            letter-spacing: 0;
           }
         }
       `}</style>
 
-      {/* HACKING LASER CURSOR */}
-      <div 
-        style={{
-          position: 'fixed',
-          left: `${mousePosition.x}px`,
-          top: `${mousePosition.y}px`,
-          width: '28px',
-          height: '28px',
-          borderRadius: '50%',
-          border: `3px solid ${cursorColor}`,
-          background: `radial-gradient(circle, rgba(${cursorColorRgb}, 0.35), transparent)`,
-          pointerEvents: 'none',
-          zIndex: 10001,
-          transform: 'translate(-50%, -50%)',
-          boxShadow: `0 0 30px ${cursorColor}, inset 0 0 15px ${cursorColor}`,
-          transition: 'width 0.15s, height 0.15s',
-          mixBlendMode: 'screen'
-        }}
-      >
-        <div style={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          width: '8px',
-          height: '8px',
-          borderRadius: '50%',
-          background: cursorColor,
-          transform: 'translate(-50%, -50%)',
-          boxShadow: `0 0 18px ${cursorColor}, 0 0 8px #fff`
-        }}></div>
-        
-        {/* Crosshair lines */}
-        <div style={{
-          position: 'absolute',
-          top: '50%',
-          left: '0',
-          right: '0',
-          height: '1px',
-          background: cursorColor,
-          opacity: 0.6
-        }}></div>
-        <div style={{
-          position: 'absolute',
-          left: '50%',
-          top: '0',
-          bottom: '0',
-          width: '1px',
-          background: cursorColor,
-          opacity: 0.6
-        }}></div>
-      </div>
+      {isDesktop && (
+        <div 
+          style={{
+            position: 'fixed',
+            left: `${mousePosition.x}px`,
+            top: `${mousePosition.y}px`,
+            width: '28px',
+            height: '28px',
+            borderRadius: '50%',
+            border: `3px solid ${cursorColor}`,
+            background: `radial-gradient(circle, rgba(${cursorColorRgb}, 0.35), transparent)`,
+            pointerEvents: 'none',
+            zIndex: 10001,
+            transform: 'translate(-50%, -50%)',
+            boxShadow: `0 0 30px ${cursorColor}, inset 0 0 15px ${cursorColor}`,
+            transition: 'width 0.15s, height 0.15s',
+            mixBlendMode: 'screen'
+          }}
+        >
+          <div style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            width: '8px',
+            height: '8px',
+            borderRadius: '50%',
+            background: cursorColor,
+            transform: 'translate(-50%, -50%)',
+            boxShadow: `0 0 18px ${cursorColor}, 0 0 8px #fff`
+          }}></div>
+          
+          <div style={{
+            position: 'absolute',
+            top: '50%',
+            left: '0',
+            right: '0',
+            height: '1px',
+            background: cursorColor,
+            opacity: 0.6
+          }}></div>
+          <div style={{
+            position: 'absolute',
+            left: '50%',
+            top: '0',
+            bottom: '0',
+            width: '1px',
+            background: cursorColor,
+            opacity: 0.6
+          }}></div>
+        </div>
+      )}
 
-      <div className="relative z-10 w-full max-w-md mx-auto" style={{ transformStyle: 'preserve-3d' }}>
-        <header className={`text-center mb-8 sm:mb-12 animate-float ${isGlitching ? 'glitch-active' : ''} ${glitchEffect ? 'glitch-effect-active' : ''}`}>
-          <div className="relative mb-6 sm:mb-8 inline-block">
+      <div className="relative z-10 w-full max-w-xs sm:max-w-md mx-auto px-2" style={{ transformStyle: 'preserve-3d' }}>
+        <header className={`text-center mb-6 sm:mb-8 md:mb-12 animate-float ${isGlitching ? 'glitch-active' : ''} ${glitchEffect ? 'glitch-effect-active' : ''}`}>
+          <div className="relative mb-4 sm:mb-6 md:mb-8 inline-block">
             <div 
-              className="absolute -inset-6 sm:-inset-8 blur-3xl glow-effect"
+              className="absolute -inset-4 sm:-inset-6 md:-inset-8 blur-3xl glow-effect"
               style={{
                 background: `radial-gradient(circle, rgba(111, 41, 255, 0.65), rgba(40, 255, 133, 0.65))`
               }}
             ></div>
             <div 
-              className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl sm:rounded-3xl p-4 sm:p-5 shadow-2xl overflow-hidden group"
+              className="relative w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-xl sm:rounded-2xl md:rounded-3xl p-3 sm:p-4 md:p-5 shadow-2xl overflow-hidden group"
               style={{
-                // REVERSED: left purple, right green
                 background: 'linear-gradient(90deg, #6F29FF 0%, #6F29FF 50%, #28FF85 50%, #28FF85 100%)',
                 border: '3px solid rgba(255, 255, 255, 0.25)',
                 boxShadow: `-12px 0 35px rgba(40, 255, 133, 0.95), 12px 0 35px rgba(111, 41, 255, 0.95)`,
@@ -777,12 +796,11 @@ export default function App() {
             </div>
           </div>
           
-          <div className="mb-3 sm:mb-4 px-2">
-            <span className="text-xl sm:text-2xl md:text-3xl cyber-font font-black" style={{color: '#6F29FF', textShadow: '0 0 24px rgba(111, 41, 255, 1)'}}>{'< '}</span>
-            <h1 className="cyber-font text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black inline-block glitch-text">
+          <div className="mb-2 sm:mb-3 md:mb-4 px-2">
+            <span className="text-lg sm:text-xl md:text-2xl lg:text-3xl cyber-font font-black" style={{color: '#6F29FF', textShadow: '0 0 24px rgba(111, 41, 255, 1)'}}>{'< '}</span>
+            <h1 className="cyber-font text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-black inline-block glitch-text">
               <span 
                 style={{
-                  // REVERSED gradient
                   background: 'linear-gradient(90deg, #6F29FF 0%, #6FD9AF 50%, #28FF85 100%)',
                   WebkitBackgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
@@ -795,15 +813,13 @@ export default function App() {
                 {isTyping && <span className="typing-cursor">|</span>}
               </span>
             </h1>
-            <span className="text-xl sm:text-2xl md:text-3xl cyber-font font-black" style={{color: '#28FF85', textShadow: '0 0 24px rgba(40, 255, 133, 1)'}}>{' />'}</span>
+            <span className="text-lg sm:text-xl md:text-2xl lg:text-3xl cyber-font font-black" style={{color: '#28FF85', textShadow: '0 0 24px rgba(40, 255, 133, 1)'}}>{' />'}</span>
           </div>
           
-          {/* VERTICAL LAYOUT: DEVELOPER + EXECUTE.EXE */}
-          <div className="flex flex-col items-center gap-4 mb-6 sm:mb-8">
+          <div className="flex flex-col items-center gap-3 sm:gap-4 mb-4 sm:mb-6 md:mb-8">
             <div 
-              className="inline-flex items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2 sm:py-3 rounded-full relative"
+              className="inline-flex items-center gap-2 sm:gap-3 px-3 sm:px-4 md:px-5 py-2 sm:py-2.5 md:py-3 rounded-full relative"
               style={{
-                // REVERSED: left purple, right green
                 background: 'linear-gradient(90deg, #6F29FF 0%, #6F29FF 50%, #28FF85 50%, #28FF85 100%)',
                 border: '2px solid rgba(255, 255, 255, 0.35)',
                 boxShadow: '-10px 0 24px rgba(40, 255, 133, 0.75), 10px 0 24px rgba(111, 41, 255, 0.75)',
@@ -819,7 +835,7 @@ export default function App() {
                 }}
               ></div>
               <Terminal 
-                className="w-4 h-4 sm:w-5 sm:h-5 relative z-10 icon-glow" 
+                className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 relative z-10 icon-glow" 
                 style={{
                   color: '#28FF85',
                   filter: 'drop-shadow(0 0 12px rgba(111, 41, 255, 1))',
@@ -827,7 +843,7 @@ export default function App() {
                 }} 
               />
               <span 
-                className="hack-font text-xs sm:text-sm md:text-base font-bold tracking-widest relative z-10"
+                className="hack-font text-xs sm:text-sm md:text-base font-bold tracking-wider sm:tracking-widest relative z-10"
                 style={{
                   color: 'rgba(255, 255, 255, 1)',
                   textShadow: '0 0 18px rgba(255, 255, 255, 0.95)',
@@ -837,7 +853,7 @@ export default function App() {
                 DEVELOPER
               </span>
               <Terminal 
-                className="w-4 h-4 sm:w-5 sm:h-5 relative z-10 icon-glow" 
+                className="w-3.5 h-3.5 sm:w-4 sm:h-4 md:w-5 md:h-5 relative z-10 icon-glow" 
                 style={{
                   color: '#6F29FF',
                   filter: 'drop-shadow(0 0 12px rgba(40, 255, 133, 1))',
@@ -846,15 +862,13 @@ export default function App() {
               />
             </div>
             
-            {/* EXECUTE.EXE WITH FULL HACKING FRAME - REVERSED COLORS */}
             <div className="relative inline-block" style={{ perspective: '800px', transformStyle: 'preserve-3d' }}>
               <div 
                 className="relative terminal-frame"
                 style={{
-                  // REVERSED: left purple, right green
                   background: 'linear-gradient(90deg, rgba(40, 255, 133, 0.4) 0%, rgba(40, 255, 133, 0.4) 50%, rgba(111, 41, 255, 0.4) 50%, rgba(111, 41, 255, 0.4) 100%)',
-                  borderRadius: '12px',
-                  padding: '12px 24px',
+                  borderRadius: '10px',
+                  padding: '10px 18px',
                   overflow: 'visible',
                   transformStyle: 'preserve-3d',
                   border: '3px solid rgba(255, 255, 255, 0.3)',
@@ -863,9 +877,8 @@ export default function App() {
                 <div style={{
                   position: 'absolute',
                   inset: 0,
-                  borderRadius: '12px',
+                  borderRadius: '10px',
                   padding: '3px',
-                  // REVERSED: left purple, right green
                   background: 'linear-gradient(90deg, #28FF85 0%, #28FF85 50%, #6F29FF 50%, #6F29FF 100%)',
                   WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
                   WebkitMaskComposite: 'xor',
@@ -878,16 +891,14 @@ export default function App() {
                   style={{
                     background: 'linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.7), transparent)',
                     transform: 'translateX(-50%) translateZ(10px)',
-                    // REVERSED shadows
                     boxShadow: '-3px 0 12px rgba(40, 255, 133, 0.9), 3px 0 12px rgba(111, 41, 255, 0.9)'
                   }}
                 ></div>
                 
                 <p 
-                  className="hack-font text-xs sm:text-sm font-bold tracking-widest relative z-10"
+                  className="hack-font text-xs sm:text-sm font-bold tracking-wider sm:tracking-widest relative z-10"
                   style={{
                     color: 'rgba(255, 255, 255, 1)',
-                    // REVERSED shadows
                     textShadow: `-3px 0 14px rgba(40, 255, 133, 1), 3px 0 14px rgba(111, 41, 255, 1)`,
                     fontWeight: 700,
                     margin: 0,
@@ -901,7 +912,7 @@ export default function App() {
           </div>
         </header>
 
-        <div className="w-full space-y-3 sm:space-y-4">
+        <div className="w-full space-y-2.5 sm:space-y-3 md:space-y-4">
           {links.map((link, index) => {
             const Icon = link.icon;
             if (!cardsVisible[index]) return null;
@@ -914,18 +925,17 @@ export default function App() {
                 onMouseLeave={() => handleCardMouseLeave(index)}
               >
                 <div
-                  className="hack-card rounded-xl sm:rounded-2xl"
+                  className="hack-card rounded-lg sm:rounded-xl md:rounded-2xl"
                   style={{ 
                     animationDelay: `${index * 0.2}s`,
-                    // REVERSED: left green, right purple
                     background: 'linear-gradient(90deg, rgba(40, 255, 133, 0.28) 0%, rgba(40, 255, 133, 0.28) 50%, rgba(111, 41, 255, 0.28) 50%, rgba(111, 41, 255, 0.28) 100%)',
                     position: 'relative',
                     boxShadow: hoveredCard === index 
                       ? `-24px 0 60px rgba(40, 255, 133, 0.95), 24px 0 60px rgba(111, 41, 255, 0.95), 0 24px 70px rgba(0, 0, 0, 0.95)`
                       : `-18px 0 42px rgba(40, 255, 133, 0.75), 18px 0 42px rgba(111, 41, 255, 0.75), 0 12px 48px rgba(0, 0, 0, 0.75)`,
-                    borderRadius: '16px',
+                    borderRadius: window.innerWidth < 640 ? '12px' : window.innerWidth < 768 ? '14px' : '16px',
                     overflow: 'visible',
-                    transform: hoveredCard === index
+                    transform: hoveredCard === index && isDesktop
                       ? `perspective(1200px) translateY(-28px) translateZ(35px) rotateX(${card3DRotation[index].x}deg) rotateY(${card3DRotation[index].y}deg) scale(1.1)`
                       : `perspective(1200px) translateY(0) translateZ(0) rotateX(0deg) rotateY(0deg) scale(1)`,
                     transition: 'all 0.5s cubic-bezier(0.165, 0.84, 0.44, 1)'
@@ -936,9 +946,8 @@ export default function App() {
                   <div style={{
                     position: 'absolute',
                     inset: 0,
-                    borderRadius: '16px',
+                    borderRadius: window.innerWidth < 640 ? '12px' : window.innerWidth < 768 ? '14px' : '16px',
                     padding: '4px',
-                    // REVERSED: left green, right purple
                     background: 'linear-gradient(90deg, #28FF85 0%, #28FF85 50%, #6F29FF 50%, #6F29FF 100%)',
                     WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
                     WebkitMaskComposite: 'xor',
@@ -949,11 +958,10 @@ export default function App() {
                   }}></div>
                   
                   <div 
-                    className="absolute left-1/2 top-0 bottom-0 w-1"
+                    className="absolute left-1/2 top-0 bottom-0 w-0.5 sm:w-1"
                     style={{
                       background: 'linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.6), transparent)',
                       transform: 'translateX(-50%) translateZ(10px)',
-                      // REVERSED shadows
                       boxShadow: '-4px 0 14px rgba(40, 255, 133, 0.85), 4px 0 14px rgba(111, 41, 255, 0.85)',
                       zIndex: 100
                     }}
@@ -965,24 +973,22 @@ export default function App() {
                     className="block group relative"
                     style={{ transformStyle: 'preserve-3d' }}
                   >
-                    <div className="relative p-4 sm:p-5 z-10" style={{ transform: 'translateZ(15px)' }}>
-                      <div className="flex items-center gap-3 sm:gap-4">
+                    <div className="relative p-3 sm:p-4 md:p-5 z-10" style={{ transform: 'translateZ(15px)' }}>
+                      <div className="flex items-center gap-2.5 sm:gap-3 md:gap-4">
                         <div className="relative flex-shrink-0">
                           <div 
-                            className="absolute -inset-2 blur-xl transition-all duration-500"
+                            className="absolute -inset-1.5 sm:-inset-2 blur-xl transition-all duration-500"
                             style={{
-                              // REVERSED: left green, right purple
                               background: `linear-gradient(90deg, rgba(40, 255, 133, ${hoveredCard === index ? 0.85 : 0.55}) 0%, rgba(40, 255, 133, ${hoveredCard === index ? 0.85 : 0.55}) 50%, rgba(111, 41, 255, ${hoveredCard === index ? 0.85 : 0.55}) 50%, rgba(111, 41, 255, ${hoveredCard === index ? 0.85 : 0.55}) 100%)`,
                               opacity: hoveredCard === index ? 1 : 0.9
                             }}
                           ></div>
                           <div 
-                            className="relative w-12 h-12 sm:w-14 sm:h-14 rounded-lg sm:rounded-xl transition-all duration-600 flex items-center justify-center"
+                            className="relative w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 rounded-md sm:rounded-lg md:rounded-xl transition-all duration-600 flex items-center justify-center"
                             style={{
-                              // REVERSED: left green, right purple
                               background: `linear-gradient(90deg, #28FF85 0%, #28FF85 50%, #6F29FF 50%, #6F29FF 100%)`,
                               boxShadow: `-12px 0 35px rgba(40, 255, 133, ${hoveredCard === index ? 1 : 0.85}), 12px 0 35px rgba(111, 41, 255, ${hoveredCard === index ? 1 : 0.85}), inset 0 0 24px rgba(255, 255, 255, 0.3)`,
-                              transform: hoveredCard === index ? 'scale(1.3) rotate(15deg) translateZ(25px)' : 'scale(1) rotate(0deg) translateZ(0)',
+                              transform: hoveredCard === index && isDesktop ? 'scale(1.3) rotate(15deg) translateZ(25px)' : 'scale(1) rotate(0deg) translateZ(0)',
                               overflow: 'visible',
                               position: 'relative',
                               transformStyle: 'preserve-3d'
@@ -991,9 +997,8 @@ export default function App() {
                             <div style={{
                               position: 'absolute',
                               inset: 0,
-                              borderRadius: '12px',
+                              borderRadius: window.innerWidth < 640 ? '6px' : window.innerWidth < 768 ? '8px' : '12px',
                               padding: '3px',
-                              // REVERSED: left green, right purple
                               background: 'linear-gradient(90deg, #28FF85 0%, #28FF85 50%, #6F29FF 50%, #6F29FF 100%)',
                               WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
                               WebkitMaskComposite: 'xor',
@@ -1010,11 +1015,10 @@ export default function App() {
                               }}
                             ></div>
                             <Icon 
-                              className="w-7 h-7 sm:w-8 sm:h-8 hack-icon relative z-10" 
+                              className="w-5 h-5 sm:w-6 sm:h-6 md:w-8 md:h-8 hack-icon relative z-10" 
                               strokeWidth={3}
                               style={{
                                 color: 'rgba(255, 255, 255, 0.98)',
-                                // REVERSED shadows
                                 filter: `drop-shadow(-6px 0 12px rgba(40, 255, 133, 1)) drop-shadow(6px 0 12px rgba(111, 41, 255, 1))`
                               }}
                             />
@@ -1022,11 +1026,10 @@ export default function App() {
                         </div>
                         
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
+                          <div className="flex items-center gap-1.5 sm:gap-2 mb-0.5 sm:mb-1">
                             <span 
-                              className="hack-font text-xs font-bold px-1.5 py-0.5 rounded relative"
+                              className="hack-font text-xs font-bold px-1 sm:px-1.5 py-0.5 rounded relative"
                               style={{
-                                // REVERSED: left green, right purple
                                 background: `linear-gradient(90deg, rgba(40, 255, 133, 0.55) 0%, rgba(40, 255, 133, 0.55) 50%, rgba(111, 41, 255, 0.55) 50%, rgba(111, 41, 255, 0.55) 100%)`,
                                 overflow: 'visible'
                               }}
@@ -1036,7 +1039,6 @@ export default function App() {
                                 inset: 0,
                                 borderRadius: '4px',
                                 padding: '2px',
-                                // REVERSED: left green, right purple
                                 background: 'linear-gradient(90deg, #28FF85 0%, #28FF85 50%, #6F29FF 50%, #6F29FF 100%)',
                                 WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
                                 WebkitMaskComposite: 'xor',
@@ -1045,15 +1047,13 @@ export default function App() {
                               }}></div>
                               <span className="relative z-10" style={{
                                 color: 'white',
-                                // REVERSED shadows
                                 textShadow: `-2px 0 10px rgba(40, 255, 133, 1), 2px 0 10px rgba(111, 41, 255, 1)`
                               }}>{link.tag}</span>
                             </span>
                             <h3 
-                              className="cyber-font text-lg sm:text-xl md:text-2xl font-black transition-all duration-500 tracking-tight glitch-text"
+                              className="cyber-font text-base sm:text-lg md:text-xl lg:text-2xl font-black transition-all duration-500 tracking-tight glitch-text"
                               style={{
                                 color: 'white',
-                                // REVERSED shadows
                                 textShadow: `-4px 0 18px rgba(40, 255, 133, ${hoveredCard === index ? 1 : 0.85}), 4px 0 18px rgba(111, 41, 255, ${hoveredCard === index ? 1 : 0.85})`,
                                 transform: hoveredCard === index ? 'translateX(8px)' : 'translateX(0)',
                                 fontWeight: 900
@@ -1067,7 +1067,6 @@ export default function App() {
                             style={{
                               color: 'rgba(255, 255, 255, 0.95)',
                               opacity: hoveredCard === index ? 1 : 0.9,
-                              // REVERSED shadows
                               textShadow: `-2px 0 12px rgba(40, 255, 133, ${hoveredCard === index ? 0.95 : 0.65}), 2px 0 12px rgba(111, 41, 255, ${hoveredCard === index ? 0.95 : 0.65})`,
                               fontWeight: 700
                             }}
@@ -1075,11 +1074,10 @@ export default function App() {
                             {'>> '}{link.subtitle}
                           </p>
                           <div 
-                            className="rounded-full mt-2 transition-all duration-700 relative overflow-hidden"
+                            className="rounded-full mt-1.5 sm:mt-2 transition-all duration-700 relative overflow-hidden"
                             style={{
                               height: '3px',
                               width: hoveredCard === index ? '100%' : '0%',
-                              // REVERSED: left green, right purple
                               background: 'linear-gradient(90deg, #28FF85 0%, #28FF85 50%, #6F29FF 50%, #6F29FF 100%)',
                               boxShadow: `-6px 0 18px rgba(40, 255, 133, 1), 6px 0 18px rgba(111, 41, 255, 1)`
                             }}
@@ -1090,15 +1088,14 @@ export default function App() {
                           className="transition-all duration-600 flex-shrink-0"
                           style={{
                             opacity: hoveredCard === index ? 1 : 0.7,
-                            transform: hoveredCard === index ? 'translateX(8px) scale(1.5) translateZ(12px)' : 'translateX(0) scale(1) translateZ(0)'
+                            transform: hoveredCard === index && isDesktop ? 'translateX(8px) scale(1.5) translateZ(12px)' : 'translateX(0) scale(1) translateZ(0)'
                           }}
                         >
                           <ArrowRight 
-                            className="w-5 h-5 sm:w-6 sm:h-6" 
+                            className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6" 
                             strokeWidth={3}
                             style={{
                               color: 'white',
-                              // REVERSED shadows
                               filter: `-6px 0 14px rgba(40, 255, 133, ${hoveredCard === index ? 1 : 0.85}), 6px 0 14px rgba(111, 41, 255, ${hoveredCard === index ? 1 : 0.85})`
                             }}
                           />
