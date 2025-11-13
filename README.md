@@ -40,7 +40,7 @@ AccessVision is a cyberpunk-inspired link hub, splitting reality between:
 │ GRAPHICS      │ HTML5 Canvas                │
 │ ICONOGRAPHY   │ Lucide React                │
 │ TYPOGRAPHY    │ Orbitron / Share Tech Mono  │
-│ CHROMATICS    │ #6F29FF <=> #28FF85        │
+│ CHROMATICS    │ #6F29FF <=> #28FF85         │
 └───────────────┴─────────────────────────────┘
 ```
 
